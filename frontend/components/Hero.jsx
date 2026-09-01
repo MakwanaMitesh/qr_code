@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 const HERO_TABS = [
   { type: 'url',   icon: 'bi-link-45deg', label: 'URL',   placeholder: 'https://example.com',         default: 'https://example.com' },
@@ -45,10 +46,18 @@ export default function Hero() {
   const [addFrame, setAddFrame]   = useState(false)
   const [logoSrc, setLogoSrc]     = useState(null)
   const [logoDragOver, setLogoDragOver] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [savedShortUrl, setSavedShortUrl] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const router = useRouter()
 
   const canvasRef = useRef(null)
   const fileInputRef = useRef(null)
   const trackTimerRef = useRef(null)
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('qrcraft_token'))
+  }, [])
 
   const generate = useCallback(async () => {
     if (!canvasRef.current) return
@@ -58,7 +67,7 @@ export default function Hero() {
       canvasRef.current.width  = sz
       canvasRef.current.height = sz
       const level = addLogo && logoSrc ? 'H' : ecl
-      await QRCode.toCanvas(canvasRef.current, inputVal || 'https://qrcraft.app', {
+      await QRCode.toCanvas(canvasRef.current, savedShortUrl || inputVal || 'https://qrcraft.app', {
         width: sz, margin: 2, color: { dark: fgColor, light: bgColor }, errorCorrectionLevel: level,
       })
       if (addLogo && logoSrc) await overlayLogo(canvasRef.current, logoSrc)
@@ -81,6 +90,45 @@ export default function Hero() {
   }, [inputVal, fgColor, bgColor, ecl, addLogo, logoSrc, activeTab])
 
   useEffect(() => { generate() }, [generate])
+
+
+  const handleSaveTrackable = async () => {
+    if (!isLoggedIn) {
+      router.push('/login')
+      return
+    }
+    if (!inputVal) return
+    setIsSaving(true)
+    
+    try {
+      const token = localStorage.getItem('qrcraft_token')
+      const res = await fetch('http://localhost:5001/api/user/qrcodes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: `My ${activeTab.toUpperCase()} Code`,
+          content: inputVal,
+          type: activeTab,
+          design: { fgColor, bgColor, size, ecl, addLogo, addFrame }
+        })
+      })
+      
+      const data = await res.json()
+      if (res.ok) {
+        setSavedShortUrl(`http://localhost:5001/r/${data.shortId}`)
+      } else {
+        alert('Failed to save: ' + data.error)
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Network error')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleTabClick = (tab) => {
     setActiveTab(tab.type)
@@ -105,7 +153,7 @@ export default function Hero() {
     try {
       const QRCode = (await import('qrcode')).default
       const level = addLogo && logoSrc ? 'H' : ecl
-      const svg = await QRCode.toString(inputVal || 'https://qrcraft.app', { type: 'svg', color: { dark: fgColor, light: bgColor }, errorCorrectionLevel: level })
+      const svg = await QRCode.toString(savedShortUrl || inputVal || 'https://qrcraft.app', { type: 'svg', color: { dark: fgColor, light: bgColor }, errorCorrectionLevel: level })
       const blob = new Blob([svg], { type: 'image/svg+xml' }); const url = URL.createObjectURL(blob)
       const a = document.createElement('a'); a.download = 'qrcraft-code.svg'; a.href = url; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch (_) {}
@@ -202,8 +250,8 @@ export default function Hero() {
                       </span>
                       <div className="qr-input-row" style={{ background: 'rgba(124,58,237,.05)', border: '1px solid rgba(124,58,237,.2)' }}>
                         <i className="bi bi-globe" style={{ color: 'var(--clr-muted)' }}></i>
-                        <input type="text" style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: 'var(--clr-text)' }} placeholder={currentPh} value={inputVal} onChange={(e) => setInputVal(e.target.value)} />
-                        <i className="bi bi-x-circle" style={{ color: 'var(--clr-muted)', cursor: 'pointer' }} onClick={() => setInputVal('')} title="Clear"></i>
+                        <input type="text" style={{ background: 'transparent', border: 'none', width: '100%', outline: 'none', color: 'var(--clr-text)' }} placeholder={currentPh} value={inputVal} onChange={(e) => { setInputVal(e.target.value); setSavedShortUrl(null); }} />
+                        <i className="bi bi-x-circle" style={{ color: 'var(--clr-muted)', cursor: 'pointer' }} onClick={() => { setInputVal(''); setSavedShortUrl(null); }} title="Clear"></i>
                       </div>
                     </div>
 
@@ -282,7 +330,18 @@ export default function Hero() {
                     </div>
 
                     {/* Actions */}
-                    <div className="d-flex align-items-center gap-3">
+
+                    <div className="d-flex align-items-center gap-3 mt-3">
+                      <button 
+                        className="btn btn-success flex-grow-1 py-2 rounded-3 fw-medium"
+                        onClick={handleSaveTrackable}
+                        disabled={isSaving || savedShortUrl}
+                      >
+                        <i className="bi bi-cloud-arrow-up me-2"></i> 
+                        {isSaving ? 'Saving...' : savedShortUrl ? 'Saved & Trackable!' : 'Save & Make Trackable'}
+                      </button>
+                    </div>
+                    <div className="d-flex align-items-center gap-3 mt-2">
                       <button className="btn btn-primary-brand flex-grow-1 py-2 rounded-3 fw-medium" onClick={handleDownload}>
                         <i className="bi bi-download me-2"></i> Download PNG
                       </button>

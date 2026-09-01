@@ -4,6 +4,11 @@ import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { adminRouter } from './routes/admin.js';
 import { trackingRouter } from './routes/tracking.js';
+import { userRouter } from './routes/user.js';
+import { redirectRouter } from './routes/redirect.js';
+import { adminBlogRouter } from './routes/admin/blog.js';
+import { publicBlogRouter } from './routes/blog.js';
+
 
 const app: Application = express();
 
@@ -17,5 +22,10 @@ app.use('/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/tracking', trackingRouter);
+app.use('/api/user', userRouter);
+app.use('/r', redirectRouter);
+app.use('/api/admin/blogs', adminBlogRouter);
+app.use('/api/blogs', publicBlogRouter);
+
 
 export default app;

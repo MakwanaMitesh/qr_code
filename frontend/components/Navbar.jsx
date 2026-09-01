@@ -84,6 +84,9 @@ export default function Navbar() {
               <a className="nav-link" href="/#how-it-works" id="nav-how">How It Works</a>
             </li>
             <li className="nav-item">
+              <Link className="nav-link" href="/blog" id="nav-blog">Blog</Link>
+            </li>
+            <li className="nav-item">
               <a className="nav-link" href="/#faq" id="nav-faq">FAQ</a>
             </li>
           </ul>
@@ -95,7 +98,7 @@ export default function Navbar() {
             
             {user ? (
               <div className="d-flex align-items-center gap-2">
-                <Link href={user.role === 'ADMIN' ? '/admin' : '/'} className="btn btn-outline-brand btn-sm">
+                <Link href={user.role === 'ADMIN' ? '/admin' : '/dashboard'} className="btn btn-outline-brand btn-sm">
                   Dashboard
                 </Link>
                 <button onClick={handleLogout} className="btn btn-sm btn-light border">Logout</button>

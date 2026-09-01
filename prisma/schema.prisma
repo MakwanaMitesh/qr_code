@@ -22,6 +22,8 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  qrCodes   QRCode[]
+  blogs     Blog[]
 }
 
 model QRCodeEvent {
@@ -29,4 +31,33 @@ model QRCodeEvent {
   type      String   @default("url") // e.g. url, wifi, vcard, email, text
   userId    String?  // Optional link to logged-in user who generated it
   createdAt DateTime @default(now())
+}
+
+model QRCode {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  content   String
+  type      String   @default("url")
+  shortId   String   @unique
+  scans     Int      @default(0)
+  design    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Blog {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String
+  published   Boolean  @default(false)
+  coverImage  String?
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

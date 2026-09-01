@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 const TYPES = [
   { key: 'qr',     icon: 'bi-qr-code',      label: 'QR Code',        ph: 'https://www.yourwebsite.com' },
@@ -67,10 +68,18 @@ export default function LiveGenerator() {
   const [addFrame, setAddFrame]     = useState(false)
   const [logoSrc, setLogoSrc]       = useState(null)   // base64 data URL
   const [logoDragOver, setLogoDragOver] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [savedShortUrl, setSavedShortUrl] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const router = useRouter()
 
   const canvasRef  = useRef(null)
   const fileInputRef = useRef(null)
   const trackTimerRef = useRef(null)
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('qrcraft_token'))
+  }, [])
 
   /* ─── Generate QR + optionally overlay logo ─────────────────── */
   const generate = useCallback(async () => {
@@ -84,7 +93,7 @@ export default function LiveGenerator() {
       // Use H error correction when logo is active (more recoverable)
       const level = addLogo && logoSrc ? 'H' : ecl
 
-      await QRCode.toCanvas(canvasRef.current, content || 'https://qrcraft.app', {
+      await QRCode.toCanvas(canvasRef.current, savedShortUrl || content || 'https://qrcraft.app', {
         width: sz, margin: 2,
         color: { dark: fg, light: bg },
         errorCorrectionLevel: level,
@@ -139,6 +148,45 @@ export default function LiveGenerator() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  
+  const handleSaveTrackable = async () => {
+    if (!isLoggedIn) {
+      router.push('/login')
+      return
+    }
+    if (!content) return
+    setIsSaving(true)
+    
+    try {
+      const token = localStorage.getItem('qrcraft_token')
+      const res = await fetch('http://localhost:5001/api/user/qrcodes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: `My ${activeType.toUpperCase()} Code`,
+          content,
+          type: activeType,
+          design: { fg, bg, size, ecl, addLogo, addFrame }
+        })
+      })
+      
+      const data = await res.json()
+      if (res.ok) {
+        setSavedShortUrl(`http://localhost:5001/r/${data.shortId}`)
+      } else {
+        alert('Failed to save: ' + data.error)
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Network error')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   /* ─── Type / gradient / actions ─────────────────────────────── */
   const handleTypeChange = (key) => { setActiveType(key); setContent('') }
   const handleGradient   = (g)   => { setFg(g.fg); setBg(g.bg) }
@@ -154,7 +202,7 @@ export default function LiveGenerator() {
   const handleDownloadSvg = async () => {
     try {
       const QRCode = (await import('qrcode')).default
-      const svg = await QRCode.toString(content || 'https://qrcraft.app', {
+      const svg = await QRCode.toString(savedShortUrl || content || 'https://qrcraft.app', {
         type: 'svg', color: { dark: fg, light: bg }, errorCorrectionLevel: ecl,
       })
       const blob = new Blob([svg], { type: 'image/svg+xml' })
@@ -220,10 +268,10 @@ export default function LiveGenerator() {
                     id="live-content-input"
                     placeholder={currentPh}
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={(e) => { setContent(e.target.value); setSavedShortUrl(null); }}
                   />
                   <i className="bi bi-x-circle" style={{ color: 'var(--clr-muted)', cursor: 'pointer' }}
-                    onClick={() => setContent('')} title="Clear"></i>
+                    onClick={() => { setContent(''); setSavedShortUrl(null); }} title="Clear"></i>
                 </div>
               </div>
 
@@ -388,7 +436,20 @@ export default function LiveGenerator() {
               )}
 
               {/* Actions */}
-              <div className="d-flex gap-2 flex-wrap">
+
+              <div className="d-flex gap-2 flex-wrap mt-3">
+                <button 
+                  id="live-save-btn" 
+                  className="btn btn-success flex-grow-1 fw-bold"
+                  style={{ borderRadius: '.6rem' }} 
+                  onClick={handleSaveTrackable}
+                  disabled={isSaving || savedShortUrl}
+                >
+                  <i className="bi bi-cloud-arrow-up me-1"></i> 
+                  {isSaving ? 'Saving...' : savedShortUrl ? 'Saved & Trackable!' : 'Save & Make Trackable'}
+                </button>
+              </div>
+              <div className="d-flex gap-2 flex-wrap mt-2">
                 <button id="live-download-png" className="btn btn-primary-brand flex-grow-1"
                   style={{ borderRadius: '.6rem' }} onClick={handleDownloadPng}>
                   <i className="bi bi-download me-1"></i> Download PNG

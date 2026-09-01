@@ -35,6 +35,7 @@ export default function AdminLayout({ children }) {
   const navItems = [
     { href: '/admin', icon: '⊞', label: 'Dashboard', exact: true },
     { href: '/admin/users', icon: '👥', label: 'Users', exact: false },
+    { href: '/admin/blogs', icon: '📝', label: 'Blogs', exact: false },
   ]
 
   const isActive = (item) => item.exact ? pathname === item.href : pathname.startsWith(item.href)
@@ -119,7 +120,7 @@ export default function AdminLayout({ children }) {
             <div>
               <div className="breadcrumb-label">Admin Panel</div>
               <h1 className="page-title">
-                {pathname === '/admin' ? 'Dashboard' : pathname.includes('/users') ? 'User Management' : 'Admin'}
+                {pathname === '/admin' ? 'Dashboard' : pathname.includes('/users') ? 'User Management' : pathname.includes('/blogs') ? 'Blog Management' : 'Admin'}
               </h1>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
