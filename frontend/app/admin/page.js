@@ -21,15 +21,15 @@ const activityData = [
   { day: 'Sun', logins: 0 },
 ]
 
-const PIE_COLORS = ['#7c3aed', '#06b6d4', '#f59e0b']
+const PIE_COLORS = ['#2563eb', '#64748b', '#f59e0b']
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{ background: '#1e1245', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, padding: '10px 16px', color: '#fff', fontSize: '0.85rem' }}>
-        <div style={{ color: '#a78bfa', fontWeight: 700, marginBottom: 4 }}>{label}</div>
+      <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: '0.82rem' }}>
+        <div style={{ color: '#94a3b8', fontWeight: 600, marginBottom: 2 }}>{label}</div>
         {payload.map((p, i) => (
-          <div key={i} style={{ color: '#e2e8f0' }}>{p.name}: <strong>{p.value}</strong></div>
+          <div key={i} style={{ color: '#ffffff' }}>{p.name}: <strong>{p.value}</strong></div>
         ))}
       </div>
     )
@@ -44,7 +44,6 @@ export default function AdminDashboard() {
   })
   const [loading, setLoading] = useState(true)
   
-  // Date filter state
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
@@ -55,7 +54,7 @@ export default function AdminDashboard() {
       try {
         let url = 'http://localhost:5001/api/admin/stats?'
         if (startDate) url += `startDate=${startDate}&`
-        if (endDate) url += `endDate=${endDate}T23:59:59.999Z` // Include full end day
+        if (endDate) url += `endDate=${endDate}T23:59:59.999Z`
 
         const res = await fetch(url, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -75,70 +74,100 @@ export default function AdminDashboard() {
 
   const statCards = [
     {
-      label: 'QR Codes Generated', value: stats.totalQRCodes, icon: '🚀',
-      gradient: 'linear-gradient(135deg, #10b981, #047857)', // Green
-      badge: `${stats.qrCodesToday} today (vs ${stats.qrCodesYesterday} yday)`, badgeColor: '#a7f3d0',
+      label: 'QR Codes Generated', value: stats.totalQRCodes, icon: 'bi-qr-code-scan',
+      badge: `${stats.qrCodesToday} today (vs ${stats.qrCodesYesterday} yday)`,
     },
     {
-      label: 'Total Users', value: stats.totalUsers, icon: '👥',
-      gradient: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-      badge: 'Active users', badgeColor: '#a78bfa',
+      label: 'Total Users', value: stats.totalUsers, icon: 'bi-people-fill',
+      badge: 'Active registered users',
     },
     {
-      label: 'Admin Users', value: stats.adminUsers, icon: '🛡',
-      gradient: 'linear-gradient(135deg, #0891b2, #0e7490)',
-      badge: 'Full access', badgeColor: '#67e8f9',
+      label: 'Admin Users', value: stats.adminUsers, icon: 'bi-shield-check',
+      badge: 'Full access',
     },
     {
-      label: 'Regular Users', value: stats.regularUsers, icon: '👤',
-      gradient: 'linear-gradient(135deg, #d97706, #b45309)',
-      badge: 'Standard plan', badgeColor: '#fcd34d',
+      label: 'Regular Users', value: stats.regularUsers, icon: 'bi-person',
+      badge: 'Standard plan',
     },
   ]
 
   return (
     <>
       <style>{`
-        .dash-stat-card { border-radius: 20px; padding: 24px; color: #fff; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transition: transform 0.25s, box-shadow 0.25s; }
-        .dash-stat-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        .dash-stat-card::after { content: ''; position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.08); }
-        .chart-card { background: #fff; border-radius: 20px; padding: 24px; border: 1px solid #eaecf0; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-        .chart-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0 0 4px; }
-        .chart-sub { font-size: 0.78rem; color: #9ca3af; margin: 0 0 20px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
-        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
-        .grid-1 { margin-bottom: 24px; }
-        
-        .date-filter-bar { background: #fff; padding: 16px 24px; border-radius: 16px; border: 1px solid #eaecf0; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-        .date-input-group { display: flex; align-items: center; gap: 12px; }
-        .date-input { border: 1.5px solid #e8eaf0; border-radius: 10px; padding: 8px 14px; font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #374151; outline: none; transition: border 0.2s; background: #fafbff; }
-        .date-input:focus { border-color: #7c3aed; background: #fff; }
-        
-        @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 900px) { .grid-4 { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+        /* Filament Widget Cards */
+        .fl-stat-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 20px 24px;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+          position: relative;
+        }
+        .fl-chart-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        .fl-chart-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0 0 2px; }
+        .fl-chart-sub { font-size: 0.78rem; color: #64748b; margin: 0 0 16px; }
+
+        .fl-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .fl-grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+        .fl-filter-bar {
+          background: #ffffff;
+          padding: 14px 20px;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 16px;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        .fl-date-input {
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          padding: 6px 12px;
+          font-family: inherit;
+          font-size: 0.85rem;
+          color: #0f172a;
+          outline: none;
+          background: #ffffff;
+        }
+        .fl-date-input:focus {
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        @media (max-width: 1200px) { .fl-grid-4 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 900px) { .fl-grid-4 { grid-template-columns: 1fr; } .fl-grid-2 { grid-template-columns: 1fr; } }
       `}</style>
 
       {/* Date Filter Bar */}
-      <div className="date-filter-bar shadow-sm">
-        <div style={{ fontWeight: 600, color: '#374151', fontSize: '0.95rem' }}>
-          <i className="bi bi-calendar3 me-2" style={{ color: '#7c3aed' }}></i>
-          Filter Dashboard Data
+      <div className="fl-filter-bar">
+        <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <i className="bi bi-calendar3" style={{ color: '#2563eb' }}></i> Filter Stats Date Range
         </div>
-        <div className="date-input-group">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>From:</span>
+            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>From:</span>
             <input 
               type="date" 
-              className="date-input" 
+              className="fl-date-input" 
               value={startDate} 
               onChange={e => setStartDate(e.target.value)} 
             />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>To:</span>
+            <span style={{ fontSize: '0.8rem', color: '#64748b' }}>To:</span>
             <input 
               type="date" 
-              className="date-input" 
+              className="fl-date-input" 
               value={endDate} 
               onChange={e => setEndDate(e.target.value)} 
             />
@@ -146,7 +175,7 @@ export default function AdminDashboard() {
           {(startDate || endDate) && (
             <button 
               onClick={() => { setStartDate(''); setEndDate(''); }}
-              style={{ background: '#fef2f2', color: '#ef4444', border: 'none', padding: '8px 12px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', marginLeft: 8 }}
+              style={{ background: '#f8fafc', border: '1px solid #d1d5db', color: '#dc2626', padding: '6px 12px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
             >
               Clear
             </button>
@@ -154,18 +183,18 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid-4">
+      {/* Filament Stat Widget Cards */}
+      <div className="fl-grid-4">
         {statCards.map((card, i) => (
-          <div key={i} className="dash-stat-card" style={{ background: card.gradient }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', opacity: 0.8 }}>{card.label}</span>
-              <div style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.2)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>{card.icon}</div>
+          <div key={i} className="fl-stat-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>{card.label}</span>
+              <i className={`bi ${card.icon}`} style={{ fontSize: '1.1rem', color: '#2563eb' }}></i>
             </div>
-            <div style={{ fontSize: '3rem', fontWeight: 800, lineHeight: 1, marginBottom: 12 }}>
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.1, marginBottom: 8 }}>
               {loading ? '—' : card.value}
             </div>
-            <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.15)', borderRadius: 20, padding: '3px 12px', fontSize: '0.75rem', fontWeight: 600, color: card.badgeColor }}>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
               {card.badge}
             </div>
           </div>
@@ -173,59 +202,55 @@ export default function AdminDashboard() {
       </div>
 
       {/* Area Chart + Pie Chart */}
-      <div className="grid-2">
-        <div className="chart-card">
-          <div className="chart-title">User Registrations</div>
-          <div className="chart-sub">Monthly growth over the last 6 months</div>
+      <div className="fl-grid-2">
+        <div className="fl-chart-card">
+          <div className="fl-chart-title">User Registrations</div>
+          <div className="fl-chart-sub">Monthly growth over the last 6 months</div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={registrationData}>
               <defs>
                 <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="users" name="Users" stroke="#7c3aed" strokeWidth={3} fill="url(#colorUsers)" dot={{ fill: '#7c3aed', r: 5 }} activeDot={{ r: 7 }} />
+              <Area type="monotone" dataKey="users" name="Users" stroke="#2563eb" strokeWidth={2} fill="url(#colorUsers)" dot={{ fill: '#2563eb', r: 4 }} activeDot={{ r: 6 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="chart-card">
-          <div className="chart-title">User Breakdown</div>
-          <div className="chart-sub">Admin vs Regular users</div>
+        <div className="fl-chart-card">
+          <div className="fl-chart-title">User Breakdown</div>
+          <div className="fl-chart-sub">Admin vs Regular users</div>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={4} dataKey="value">
+              <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={4} dataKey="value">
                 {pieData.map((_, index) => (
                   <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} stroke="none" />
                 ))}
               </Pie>
               <Tooltip formatter={(val, name) => [val, name]} />
-              <Legend iconType="circle" iconSize={10} formatter={(val) => <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>{val}</span>} />
+              <Legend iconType="circle" iconSize={8} formatter={(val) => <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{val}</span>} />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Bar Chart */}
-      <div className="chart-card grid-1">
-        <div className="chart-title">Weekly Login Activity</div>
-        <div className="chart-sub">Number of logins per day this week</div>
+      <div className="fl-chart-card">
+        <div className="fl-chart-title">Weekly Activity</div>
+        <div className="fl-chart-sub">Daily user logins this week</div>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={activityData} barSize={28}>
+          <BarChart data={activityData} barSize={24}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 12, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124,58,237,0.05)', radius: 8 }} />
-            <Bar dataKey="logins" name="Logins" fill="#7c3aed" radius={[6, 6, 0, 0]}>
-              {activityData.map((entry, index) => (
-                <Cell key={index} fill={index === 6 ? '#4f46e5' : '#7c3aed'} fillOpacity={0.8 + index * 0.02} />
-              ))}
-            </Bar>
+            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc', radius: 6 }} />
+            <Bar dataKey="logins" name="Logins" fill="#2563eb" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

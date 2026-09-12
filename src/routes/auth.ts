@@ -73,6 +73,11 @@ router.post('/login', async (req, res): Promise<void> => {
       return;
     }
 
+    if (user.isActive === false) {
+      res.status(403).json({ error: 'Your account has been deactivated. Please contact support.' });
+      return;
+    }
+
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName }, JWT_SECRET, { expiresIn: '1d' });
     
     res.status(200).json({ token, user: { id: user.id, email: user.email, role: user.role, firstName: user.firstName, lastName: user.lastName } });

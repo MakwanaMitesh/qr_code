@@ -196,6 +196,8 @@ export default function Hero() {
                 { icon: 'bi-code-slash',            label: 'Easy',      sub: 'Simple to use' },
                 { icon: 'bi-shield-check',          label: 'Secure',    sub: 'Data never stored' },
                 { icon: 'bi-infinity',              label: 'Unlimited', sub: 'No limits' },
+                { icon: 'bi-palette-fill',          label: 'Custom',    sub: 'Colors & Logos' },
+                { icon: 'bi-download',              label: 'HD Export', sub: 'PNG & SVG formats' },
               ].map((s) => (
                 <div key={s.label} className="hero-stat">
                   <div className="stat-icon"><i className={`bi ${s.icon}`}></i></div>
@@ -330,25 +332,62 @@ export default function Hero() {
                     </div>
 
                     {/* Actions */}
+                    <div className="d-flex align-items-center gap-2 mt-3">
+                      <button className="btn btn-primary-brand flex-grow-1 py-2 rounded-3 fw-medium d-flex align-items-center justify-content-center gap-2" onClick={handleDownload}>
+                        <i className="bi bi-download"></i> Download PNG
+                      </button>
+                      <button className="btn btn-outline-brand py-2 px-3 rounded-3 fw-medium" onClick={handleDownloadSvg} title="Download vector SVG">
+                        SVG
+                      </button>
+                    </div>
 
-                    <div className="d-flex align-items-center gap-3 mt-3">
+                    {/* Dynamic Trackable Feature */}
+                    <div className="mt-3 p-2 px-3 rounded-3 trackable-card d-flex align-items-center justify-content-between">
+                      <div className="d-flex align-items-center gap-2">
+                        <div className="trackable-icon-badge">
+                          <i className="bi bi-activity"></i>
+                        </div>
+                        <div>
+                          <div className="fw-semibold trackable-title" style={{ fontSize: '.82rem' }}>Dynamic Trackable QR</div>
+                          <div className="text-secondary" style={{ fontSize: '.72rem' }}>Track scans & analytics</div>
+                        </div>
+                      </div>
                       <button 
-                        className="btn btn-success flex-grow-1 py-2 rounded-3 fw-medium"
+                        className={`btn btn-track-action ${savedShortUrl ? 'is-saved' : ''}`}
                         onClick={handleSaveTrackable}
                         disabled={isSaving || savedShortUrl}
                       >
-                        <i className="bi bi-cloud-arrow-up me-2"></i> 
-                        {isSaving ? 'Saving...' : savedShortUrl ? 'Saved & Trackable!' : 'Save & Make Trackable'}
+                        {isSaving ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Saving...
+                          </>
+                        ) : savedShortUrl ? (
+                          <>
+                            <i className="bi bi-check2-circle me-1"></i> Trackable
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-cloud-arrow-up me-1"></i> Save & Track
+                          </>
+                        )}
                       </button>
                     </div>
-                    <div className="d-flex align-items-center gap-3 mt-2">
-                      <button className="btn btn-primary-brand flex-grow-1 py-2 rounded-3 fw-medium" onClick={handleDownload}>
-                        <i className="bi bi-download me-2"></i> Download PNG
-                      </button>
-                      <button className="btn btn-link text-dark text-decoration-none fw-medium" onClick={handleDownloadSvg}>
-                        Download SVG
-                      </button>
-                    </div>
+
+                    {savedShortUrl && (
+                      <div className="mt-2 p-2 px-3 rounded-2 d-flex align-items-center justify-content-between" style={{ background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', fontSize: '.78rem' }}>
+                        <span className="text-truncate me-2" style={{ color: 'var(--clr-primary-lt)' }}>
+                          <i className="bi bi-link-45deg me-1"></i> {savedShortUrl}
+                        </span>
+                        <button 
+                          className="btn btn-sm btn-link p-0 text-decoration-none" 
+                          style={{ color: 'var(--clr-primary-lt)', fontWeight: 600, fontSize: '.78rem' }}
+                          onClick={() => { navigator.clipboard.writeText(savedShortUrl); alert('Tracking link copied to clipboard!'); }}
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    )}
 
                     <div className="mt-3">
                       <button className="btn btn-link text-secondary text-decoration-none p-0" style={{ fontSize: '.85rem' }} onClick={handleReset}>

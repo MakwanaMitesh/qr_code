@@ -20,6 +20,7 @@ model User {
   lastName  String?
   googleId  String?  @unique
   role      Role     @default(USER)
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   qrCodes   QRCode[]
@@ -58,6 +59,7 @@ model Blog {
   coverImage  String?
   authorId    String
   author      User     @relation(fields: [authorId], references: [id])
+  design      Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

@@ -436,29 +436,66 @@ export default function LiveGenerator() {
               )}
 
               {/* Actions */}
+              <div className="d-flex gap-2 align-items-center mt-3">
+                <button id="live-download-png" className="btn btn-primary-brand flex-grow-1 d-flex align-items-center justify-content-center gap-2"
+                  style={{ borderRadius: '.6rem' }} onClick={handleDownloadPng}>
+                  <i className="bi bi-download"></i> Download PNG
+                </button>
+                <button id="live-download-svg" className="btn btn-outline-brand px-3"
+                  style={{ borderRadius: '.6rem' }} onClick={handleDownloadSvg} title="Download vector SVG">
+                  SVG
+                </button>
+              </div>
 
-              <div className="d-flex gap-2 flex-wrap mt-3">
+              {/* Dynamic Trackable Feature */}
+              <div className="mt-3 p-2 px-3 rounded-3 trackable-card d-flex align-items-center justify-content-between">
+                <div className="d-flex align-items-center gap-2">
+                  <div className="trackable-icon-badge">
+                    <i className="bi bi-activity"></i>
+                  </div>
+                  <div>
+                    <div className="fw-semibold trackable-title" style={{ fontSize: '.82rem' }}>Dynamic Trackable QR</div>
+                    <div className="text-secondary" style={{ fontSize: '.72rem' }}>Track scans & analytics</div>
+                  </div>
+                </div>
                 <button 
                   id="live-save-btn" 
-                  className="btn btn-success flex-grow-1 fw-bold"
-                  style={{ borderRadius: '.6rem' }} 
+                  className={`btn btn-track-action ${savedShortUrl ? 'is-saved' : ''}`}
                   onClick={handleSaveTrackable}
                   disabled={isSaving || savedShortUrl}
                 >
-                  <i className="bi bi-cloud-arrow-up me-1"></i> 
-                  {isSaving ? 'Saving...' : savedShortUrl ? 'Saved & Trackable!' : 'Save & Make Trackable'}
+                  {isSaving ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                      Saving...
+                    </>
+                  ) : savedShortUrl ? (
+                    <>
+                      <i className="bi bi-check2-circle me-1"></i> Trackable
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-cloud-arrow-up me-1"></i> Save & Track
+                    </>
+                  )}
                 </button>
               </div>
-              <div className="d-flex gap-2 flex-wrap mt-2">
-                <button id="live-download-png" className="btn btn-primary-brand flex-grow-1"
-                  style={{ borderRadius: '.6rem' }} onClick={handleDownloadPng}>
-                  <i className="bi bi-download me-1"></i> Download PNG
-                </button>
-                <button id="live-download-svg" className="btn btn-outline-brand"
-                  style={{ borderRadius: '.6rem' }} onClick={handleDownloadSvg}>
-                  Download SVG
-                </button>
-              </div>
+
+              {savedShortUrl && (
+                <div className="mt-2 p-2 px-3 rounded-2 d-flex align-items-center justify-content-between" style={{ background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', fontSize: '.78rem' }}>
+                  <span className="text-truncate me-2" style={{ color: 'var(--clr-primary-lt)' }}>
+                    <i className="bi bi-link-45deg me-1"></i> {savedShortUrl}
+                  </span>
+                  <button 
+                    className="btn btn-sm btn-link p-0 text-decoration-none" 
+                    style={{ color: 'var(--clr-primary-lt)', fontWeight: 600, fontSize: '.78rem' }}
+                    onClick={() => { navigator.clipboard.writeText(savedShortUrl); alert('Tracking link copied to clipboard!'); }}
+                  >
+                    Copy
+                  </button>
+                </div>
+              )}
+
               <button id="live-reset" className="btn btn-sm mt-2 text-secondary"
                 style={{ fontSize: '.82rem' }} onClick={handleReset}>
                 <i className="bi bi-arrow-counterclockwise me-1"></i> Reset All
