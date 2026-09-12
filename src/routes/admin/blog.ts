@@ -22,7 +22,7 @@ router.get('/', requireAdmin, async (req: Request, res: Response) => {
 // Get single blog by ID (for admin editor)
 router.get('/:id', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const blog = await prisma.blog.findUnique({
       where: { id },
       include: { author: { select: { firstName: true, lastName: true } } }
@@ -78,7 +78,7 @@ router.post('/', requireAdmin, async (req: Request, res: Response) => {
 // Update a blog
 router.put('/:id', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { title, slug, excerpt, content, published, coverImage, tags, metaTitle, metaDescription, ogImage, canonicalUrl } = req.body;
 
     const updatedBlog = await prisma.blog.update({
@@ -109,7 +109,7 @@ router.put('/:id', requireAdmin, async (req: Request, res: Response) => {
 // Delete a blog
 router.delete('/:id', requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     await prisma.blog.delete({ where: { id } });
     res.json({ success: true });
   } catch (error) {

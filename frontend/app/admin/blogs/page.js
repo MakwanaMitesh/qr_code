@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ConfirmDialog } from '@/components/BlogEditor'
 
-const API = 'http://localhost:5001'
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
 function wordCount(html = '') {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()

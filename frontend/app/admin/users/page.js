@@ -6,7 +6,7 @@ import {
   flexRender,
 } from '@tanstack/react-table'
 
-const API = 'http://localhost:5001'
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
 /* ── Modal Dialog Styles ────────────────────────── */
 const dlgOverlay = {

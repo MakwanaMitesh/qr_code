@@ -5,6 +5,8 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+
 const registrationData = [
   { month: 'Mar', users: 0 },
   { month: 'Apr', users: 0 },
@@ -52,7 +54,7 @@ export default function AdminDashboard() {
       setLoading(true)
       const token = localStorage.getItem('qrcraft_token')
       try {
-        let url = 'http://localhost:5001/api/admin/stats?'
+        let url = `${API_URL}/api/admin/stats?`
         if (startDate) url += `startDate=${startDate}&`
         if (endDate) url += `endDate=${endDate}T23:59:59.999Z`
 

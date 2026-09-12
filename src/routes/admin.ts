@@ -104,7 +104,7 @@ router.post('/users', requireAdmin, async (req, res): Promise<void> => {
 // Update a user (Admin API)
 router.put('/users/:id', requireAdmin, async (req, res): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { email, password, firstName, lastName, role, isActive } = req.body;
 
     const dataToUpdate: any = {
@@ -153,7 +153,7 @@ router.put('/users/:id', requireAdmin, async (req, res): Promise<void> => {
 // Toggle user activation status (Admin API)
 router.patch('/users/:id/status', requireAdmin, async (req: AuthRequest, res): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { isActive } = req.body;
     const currentAdminId = req.user?.id;
 
@@ -194,7 +194,7 @@ router.patch('/users/:id/status', requireAdmin, async (req: AuthRequest, res): P
 // Delete a user (Admin API)
 router.delete('/users/:id', requireAdmin, async (req: AuthRequest, res): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const currentAdminId = req.user?.id;
 
     if (id === currentAdminId) {

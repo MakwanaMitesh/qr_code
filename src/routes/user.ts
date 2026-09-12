@@ -62,7 +62,7 @@ router.post('/qrcodes', requireAuth, async (req: Request, res: Response): Promis
 router.delete('/qrcodes/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
-    const { id } = req.params;
+    const id = String(req.params.id);
 
     // Ensure the QR code belongs to the user
     const qrCode = await prisma.qRCode.findUnique({ where: { id } });

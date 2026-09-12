@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+
 const TYPES = [
   { key: 'qr',     icon: 'bi-qr-code',      label: 'QR Code',        ph: 'https://www.yourwebsite.com' },
   { key: 'barcode',icon: 'bi-upc-scan',      label: 'Barcode',        ph: '1234567890128' },
@@ -107,7 +109,7 @@ export default function LiveGenerator() {
       trackTimerRef.current = setTimeout(async () => {
         try {
           const token = localStorage.getItem('qrcraft_token')
-          await fetch('http://localhost:5001/api/tracking/generate', {
+          await fetch(`${API_URL}/api/tracking/generate`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -159,7 +161,7 @@ export default function LiveGenerator() {
     
     try {
       const token = localStorage.getItem('qrcraft_token')
-      const res = await fetch('http://localhost:5001/api/user/qrcodes', {
+      const res = await fetch(`${API_URL}/api/user/qrcodes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +177,7 @@ export default function LiveGenerator() {
       
       const data = await res.json()
       if (res.ok) {
-        setSavedShortUrl(`http://localhost:5001/r/${data.shortId}`)
+        setSavedShortUrl(`${API_URL}/r/${data.shortId}`)
       } else {
         alert('Failed to save: ' + data.error)
       }

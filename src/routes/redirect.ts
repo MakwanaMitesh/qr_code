@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // Redirect route for tracking scans
 router.get('/:shortId', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { shortId } = req.params;
+    const shortId = String(req.params.shortId);
 
     // Find the QR code
     const qrCode = await prisma.qRCode.findUnique({

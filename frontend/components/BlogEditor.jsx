@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
-const API = 'http://localhost:5001'
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
 function getStats(html) {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()

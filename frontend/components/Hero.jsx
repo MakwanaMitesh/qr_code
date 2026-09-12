@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+
 const HERO_TABS = [
   { type: 'url',   icon: 'bi-link-45deg', label: 'URL',   placeholder: 'https://example.com',         default: 'https://example.com' },
   { type: 'text',  icon: 'bi-type',       label: 'Text',  placeholder: 'Enter your text here...',     default: '' },
@@ -76,7 +78,7 @@ export default function Hero() {
       trackTimerRef.current = setTimeout(async () => {
         try {
           const token = localStorage.getItem('qrcraft_token')
-          await fetch('http://localhost:5001/api/tracking/generate', {
+          await fetch(`${API_URL}/api/tracking/generate`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -102,7 +104,7 @@ export default function Hero() {
     
     try {
       const token = localStorage.getItem('qrcraft_token')
-      const res = await fetch('http://localhost:5001/api/user/qrcodes', {
+      const res = await fetch(`${API_URL}/api/user/qrcodes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,7 +120,7 @@ export default function Hero() {
       
       const data = await res.json()
       if (res.ok) {
-        setSavedShortUrl(`http://localhost:5001/r/${data.shortId}`)
+        setSavedShortUrl(`${API_URL}/r/${data.shortId}`)
       } else {
         alert('Failed to save: ' + data.error)
       }

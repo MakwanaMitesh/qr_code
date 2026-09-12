@@ -2,6 +2,8 @@
 import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+
 function getReadingTime(html = '') {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
   const words = text ? text.split(' ').length : 0
@@ -20,7 +22,7 @@ export default function BlogPost({ params }) {
     const slug = decodeURIComponent(rawSlug)
 
     // Fetch current blog
-    fetch(`http://localhost:5001/api/blogs/${encodeURIComponent(slug)}`)
+    fetch(`${API_URL}/api/blogs/${encodeURIComponent(slug)}`)
       .then(res => {
         if (!res.ok) throw new Error('Not found')
         return res.json()
@@ -30,7 +32,7 @@ export default function BlogPost({ params }) {
       .finally(() => setLoading(false))
 
     // Fetch other blogs for bottom section
-    fetch('http://localhost:5001/api/blogs')
+    fetch(`${API_URL}/api/blogs`)
       .then(res => res.ok ? res.json() : [])
       .then(list => setOtherBlogs(list))
       .catch(() => setOtherBlogs([]))

@@ -25,7 +25,7 @@ router.get('/', async (req: Request, res: Response) => {
 // Get a single published blog by slug
 router.get('/:slug', async (req: Request, res: Response) => {
   try {
-    const { slug } = req.params;
+    const slug = String(req.params.slug);
     const blog = await prisma.blog.findUnique({
       where: { slug },
       include: { author: { select: { firstName: true, lastName: true } } }

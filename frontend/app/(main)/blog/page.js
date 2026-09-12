@@ -2,12 +2,14 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+
 export default function BlogList() {
   const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/blogs')
+    fetch(`${API_URL}/api/blogs`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setBlogs(data)

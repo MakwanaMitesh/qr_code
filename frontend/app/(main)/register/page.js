@@ -3,6 +3,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -17,7 +19,7 @@ export default function RegisterPage() {
     setError('')
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:5001/api/auth/google-login', {
+      const res = await fetch(`${API_URL}/api/auth/google-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ credential: credentialResponse.credential })
@@ -43,7 +45,7 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const res = await fetch('http://localhost:5001/api/auth/register', {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, email, password })

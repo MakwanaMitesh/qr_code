@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+
 export default function UserDashboard() {
   const [qrCodes, setQrCodes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -19,7 +21,7 @@ export default function UserDashboard() {
       setUser(JSON.parse(storedUser))
 
       try {
-        const res = await fetch('http://localhost:5001/api/user/qrcodes', {
+        const res = await fetch(`${API_URL}/api/user/qrcodes`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
         const data = await res.json()
@@ -38,7 +40,7 @@ export default function UserDashboard() {
     
     const token = localStorage.getItem('qrcraft_token')
     try {
-      const res = await fetch(`http://localhost:5001/api/user/qrcodes/${id}`, {
+      const res = await fetch(`${API_URL}/api/user/qrcodes/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -111,7 +113,7 @@ export default function UserDashboard() {
                 </tr>
               ) : (
                 qrCodes.map((qr) => {
-                  const shortUrl = `http://localhost:5001/r/${qr.shortId}`;
+                  const shortUrl = `${API_URL}/r/${qr.shortId}`;
                   return (
                     <tr key={qr.id}>
                       <td className="px-4 py-3 fw-medium">{qr.title || 'Untitled'}</td>

@@ -13,7 +13,10 @@ import { publicBlogRouter } from './routes/blog.js';
 const app: Application = express();
 
 // ── Middleware ─────────────────────────────────────────────────────────────
-app.use(cors());
+// FRONTEND_URL can be a single origin or a comma-separated list (e.g. custom domain + Render URL).
+// If unset, all origins are allowed (fine for early testing, tighten once your frontend URL is known).
+const allowedOrigins = process.env.FRONTEND_URL?.split(',').map((o) => o.trim());
+app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
