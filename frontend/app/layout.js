@@ -1,7 +1,11 @@
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], weight: ['300','400','500','600','700','800','900'] })
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID
+const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID
 
 export const metadata = {
   title: 'QRCraft - Free QR Code Generator | Barcode, Wi-Fi, URL & More',
@@ -15,7 +19,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-bs-theme="dark" suppressHydrationWarning>
+    <html lang="en" data-bs-theme="light" suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
@@ -36,6 +40,33 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
           async
         />
+        {GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        )}
+        {CLARITY_ID && (
+          <Script id="ms-clarity" strategy="afterInteractive">
+            {`
+              (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${CLARITY_ID}");
+            `}
+          </Script>
+        )}
       </body>
     </html>
   )

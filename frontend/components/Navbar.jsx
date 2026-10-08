@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function Navbar() {
-  const [theme, setTheme] = useState('dark')
+  const [theme, setTheme] = useState('light')
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem('qrcraft-theme') || 'dark'
+    const saved = localStorage.getItem('qrcraft-theme') || 'light'
     setTheme(saved)
     document.documentElement.setAttribute('data-bs-theme', saved)
     

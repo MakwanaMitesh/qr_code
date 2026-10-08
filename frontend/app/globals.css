@@ -117,8 +117,6 @@ body{font-family:'Inter',system-ui,sans-serif;background-color:var(--clr-bg);col
 .tool-icon-wrap{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:1.4rem;margin-bottom:1rem}
 .tool-card .arrow-link{color:var(--clr-primary-lt);font-size:.85rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem;transition:var(--transition)}
 .tool-card .arrow-link:hover{gap:.6rem}
-/* AD BANNER */
-.ad-banner{background:var(--clr-surface);border:2px dashed var(--clr-border);border-radius:var(--radius-xl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;min-height:100px;color:var(--clr-muted);font-size:.85rem}
 /* HOW IT WORKS */
 #how-it-works{background:var(--clr-surface);padding:5rem 0}
 .step-card{text-align:center;padding:2rem 1.5rem;position:relative}
