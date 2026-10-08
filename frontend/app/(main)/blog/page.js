@@ -1,22 +1,32 @@
-'use client'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
-export default function BlogList() {
-  const [blogs, setBlogs] = useState([])
-  const [loading, setLoading] = useState(true)
+export const metadata = {
+  title: 'Blog',
+  description: 'Tips, tutorials, and updates on how to make the most out of dynamic QR codes for your business.',
+  alternates: { canonical: '/blog' },
+  openGraph: {
+    title: 'The QRCraft Blog',
+    description: 'Tips, tutorials, and updates on how to make the most out of dynamic QR codes for your business.',
+    url: 'https://qrcode.kalpvarti.com/blog',
+    type: 'website',
+  },
+}
 
-  useEffect(() => {
-    fetch(`${API_URL}/api/blogs`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setBlogs(data)
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+async function getBlogs() {
+  try {
+    const res = await fetch(`${API_URL}/api/blogs`, { next: { revalidate: 300 } })
+    if (!res.ok) return []
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
+  }
+}
+
+export default async function BlogList() {
+  const blogs = await getBlogs()
 
   return (
     <div className="container py-5" style={{ marginTop: '7rem', minHeight: '80vh' }}>
@@ -30,19 +40,13 @@ export default function BlogList() {
         </p>
       </div>
 
-      {loading ? (
-        <div className="text-center py-5">
-          <div className="spinner-border" style={{ color: '#7c3aed' }} role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      ) : blogs.length === 0 ? (
+      {blogs.length === 0 ? (
         <div className="text-center py-5 text-secondary">No blog posts found. Check back later!</div>
       ) : (
         <div className="row g-4">
           {blogs.map(blog => (
             <div key={blog.id} className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style={{ transition: 'transform 0.3s, box-shadow 0.3s' }} onMouseEnter={(e) => {e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)'}} onMouseLeave={(e) => {e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)'}}>
+              <div className="card blog-list-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
                 {blog.coverImage ? (
                   <div style={{ height: 200, backgroundImage: `url(${blog.coverImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                 ) : (
@@ -54,7 +58,7 @@ export default function BlogList() {
                   <div className="mb-2 text-muted" style={{ fontSize: '0.85rem' }}>
                     {new Date(blog.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </div>
-                  <h4 className="card-title fw-bold mb-3" style={{ color: '#1e1b4b' }}>{blog.title}</h4>
+                  <h2 className="card-title fw-bold mb-3" style={{ color: '#1e1b4b', fontSize: '1.25rem' }}>{blog.title}</h2>
                   <p className="card-text text-secondary mb-4" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {blog.excerpt || 'Read more about this topic...'}
                   </p>

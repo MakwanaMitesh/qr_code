@@ -168,3 +168,6 @@ body{font-family:'Inter',system-ui,sans-serif;background-color:var(--clr-bg);col
 .fade-up.visible{opacity:1;transform:translateY(0)}
 @media(max-width:991.98px){#hero{padding-top:5rem;padding-bottom:3rem;min-height:auto}.qr-preview-card{animation:none;margin-top:2rem}}
 @media(max-width:575.98px){.hero-title{font-size:2.2rem}.section-title{font-size:1.7rem}}
+/* BLOG LIST CARD HOVER */
+.blog-list-card{transition:transform .3s,box-shadow .3s;box-shadow:0 4px 6px rgba(0,0,0,.05)}
+.blog-list-card:hover{transform:translateY(-5px);box-shadow:0 10px 30px rgba(0,0,0,.1)}

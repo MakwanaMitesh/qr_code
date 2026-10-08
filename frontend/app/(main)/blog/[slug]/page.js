@@ -1,8 +1,9 @@
-'use client'
-import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import BlogShareBar from '@/components/BlogShareBar'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
+const SITE_URL = 'https://qrcode.kalpvarti.com'
 
 function getReadingTime(html = '') {
   const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
@@ -10,92 +11,95 @@ function getReadingTime(html = '') {
   return Math.max(1, Math.ceil(words / 200))
 }
 
-export default function BlogPost({ params }) {
-  const resolvedParams = use(params)
-  const [blog, setBlog] = useState(null)
-  const [otherBlogs, setOtherBlogs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [copied, setCopied] = useState(false)
-
-  useEffect(() => {
-    const rawSlug = resolvedParams?.slug || ''
-    const slug = decodeURIComponent(rawSlug)
-
-    // Fetch current blog
-    fetch(`${API_URL}/api/blogs/${encodeURIComponent(slug)}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Not found')
-        return res.json()
-      })
-      .then(data => setBlog(data))
-      .catch(() => setBlog(null))
-      .finally(() => setLoading(false))
-
-    // Fetch other blogs for bottom section
-    fetch(`${API_URL}/api/blogs`)
-      .then(res => res.ok ? res.json() : [])
-      .then(list => setOtherBlogs(list))
-      .catch(() => setOtherBlogs([]))
-  }, [resolvedParams?.slug])
-
-  const handleCopyLink = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    }
+async function getBlog(slug) {
+  try {
+    const res = await fetch(`${API_URL}/api/blogs/${encodeURIComponent(slug)}`, { next: { revalidate: 300 } })
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
   }
+}
 
-  if (loading) {
-    return (
-      <div style={{ background: '#ffffff', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid #e2e8f0', borderTop: '3px solid #2563eb', animation: 'spin 0.8s linear infinite' }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          <span style={{ color: '#64748b', fontSize: '0.88rem', fontWeight: 500 }}>Loading article...</span>
-        </div>
-      </div>
-    )
+async function getOtherBlogs() {
+  try {
+    const res = await fetch(`${API_URL}/api/blogs`, { next: { revalidate: 300 } })
+    if (!res.ok) return []
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
   }
+}
 
-  if (!blog) {
-    return (
-      <div style={{ background: '#ffffff', minHeight: '75vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <div style={{ textAlign: 'center', maxWidth: 420 }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#f1f5f9', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: '1.6rem' }}>
-            <i className="bi bi-file-earmark-x"></i>
-          </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.02em' }}>Post Not Found</h1>
-          <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: 24 }}>
-            The requested article doesn't exist or may have been moved.
-          </p>
-          <Link href="/blog" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: '#2563eb', color: '#ffffff', textDecoration: 'none',
-            padding: '10px 22px', borderRadius: 10, fontWeight: 600, fontSize: '0.9rem',
-            boxShadow: '0 2px 8px rgba(37,99,235,0.2)'
-          }}>
-            <i className="bi bi-arrow-left"></i> Back to Blog
-          </Link>
-        </div>
-      </div>
-    )
+export async function generateMetadata({ params }) {
+  const { slug } = await params
+  const blog = await getBlog(decodeURIComponent(slug))
+  if (!blog) return { title: 'Post Not Found' }
+
+  const description = blog.excerpt || blog.content.replace(/<[^>]+>/g, ' ').slice(0, 160)
+  const url = `${SITE_URL}/blog/${blog.slug}`
+
+  return {
+    title: blog.title,
+    description,
+    alternates: { canonical: `/blog/${blog.slug}` },
+    openGraph: {
+      title: blog.title,
+      description,
+      url,
+      type: 'article',
+      publishedTime: blog.createdAt,
+      modifiedTime: blog.updatedAt,
+      authors: [`${blog.author?.firstName || 'Admin'} ${blog.author?.lastName || ''}`.trim()],
+      images: blog.coverImage ? [{ url: blog.coverImage }] : undefined,
+    },
+    twitter: {
+      card: blog.coverImage ? 'summary_large_image' : 'summary',
+      title: blog.title,
+      description,
+      images: blog.coverImage ? [blog.coverImage] : undefined,
+    },
   }
+}
+
+export default async function BlogPost({ params }) {
+  const { slug: rawSlug } = await params
+  const slug = decodeURIComponent(rawSlug)
+
+  const [blog, otherBlogs] = await Promise.all([getBlog(slug), getOtherBlogs()])
+
+  if (!blog) notFound()
 
   const readTime = getReadingTime(blog.content)
   const tagsList = blog.design?.tags ? blog.design.tags.split(',').map(t => t.trim()).filter(Boolean) : []
   const category = blog.design?.category || 'Guide'
 
-  // Filter out current blog post and limit to 3 posts
   const relatedPosts = otherBlogs
     .filter(b => b.slug !== blog.slug && b.id !== blog.id)
     .slice(0, 3)
 
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: blog.title,
+    description: blog.excerpt || undefined,
+    image: blog.coverImage || undefined,
+    datePublished: blog.createdAt,
+    dateModified: blog.updatedAt || blog.createdAt,
+    author: { '@type': 'Person', name: `${blog.author?.firstName || 'Admin'} ${blog.author?.lastName || ''}`.trim() },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${blog.slug}` },
+  }
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-        
+
         .blog-article-root {
           background: #ffffff;
           min-height: 100vh;
@@ -458,34 +462,7 @@ export default function BlogPost({ params }) {
             </div>
 
             {/* Share Buttons */}
-            <div className="blog-share-btns">
-              <button
-                className="blog-share-btn"
-                onClick={handleCopyLink}
-                title={copied ? 'Link Copied!' : 'Copy Link'}
-                style={{ background: copied ? '#dcfce7' : '#ffffff', color: copied ? '#15803d' : '#64748b', border: copied ? '1px solid #bbf7d0' : '1px solid #e2e8f0' }}
-              >
-                <i className={`bi ${copied ? 'bi-check-lg' : 'bi-link-45deg'}`}></i>
-              </button>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(blog.title)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="blog-share-btn"
-                title="Share on X"
-              >
-                <i className="bi bi-twitter-x"></i>
-              </a>
-              <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="blog-share-btn"
-                title="Share on LinkedIn"
-              >
-                <i className="bi bi-linkedin"></i>
-              </a>
-            </div>
+            <BlogShareBar title={blog.title} />
           </div>
 
           {/* Featured Cover Image */}

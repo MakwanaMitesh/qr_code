@@ -7,13 +7,38 @@ const inter = Inter({ subsets: ['latin'], weight: ['300','400','500','600','700'
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID
 const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID
 
+const SITE_URL = 'https://qrcode.kalpvarti.com'
+const SITE_NAME = 'QRCraft'
+const TITLE = 'QRCraft - Free QR Code Generator | Barcode, Wi-Fi, URL & More'
+const DESCRIPTION = 'Generate free QR codes, barcodes, Wi-Fi codes, URL codes, vCard and email QR codes instantly. Customize colors, add a logo, download PNG/SVG, and track scans — no sign-up required.'
+
 export const metadata = {
-  title: 'QRCraft - Free QR Code Generator | Barcode, Wi-Fi, URL & More',
-  description: 'Generate QR codes, barcodes, Wi-Fi codes, URL codes, vCard codes and more instantly. Free, fast, no sign-up required.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: '%s | QRCraft',
+  },
+  description: DESCRIPTION,
+  keywords: [
+    'QR code generator', 'free QR code generator', 'barcode generator',
+    'Wi-Fi QR code', 'vCard QR code', 'dynamic QR code', 'trackable QR code',
+    'URL QR code generator online', 'QR code with logo',
+  ],
+  authors: [{ name: 'QRCraft' }],
+  alternates: { canonical: '/' },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'QRCraft - Free QR Code Generator',
-    description: 'Generate QR codes, barcodes and more instantly for free.',
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     type: 'website',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
   },
 }
 
