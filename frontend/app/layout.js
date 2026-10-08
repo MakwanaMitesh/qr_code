@@ -27,6 +27,9 @@ export const metadata = {
   authors: [{ name: 'QRCraft' }],
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
+  verification: {
+    google: '-T_4pXxlIs7H439HNozm0UYeBndE7w_4QZCjcWz4Ff4',
+  },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
